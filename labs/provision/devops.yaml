@@ -23,7 +23,6 @@
         - net-tools
         - curl
         - tzdata
-        - sqlite3
         - ca-certificates
       when: ansible_os_family == 'Debian'
 
@@ -35,30 +34,13 @@
 
     - name: Criar diretório ".ssh" para o root
       file:
-        path: "{{ item.path }}"  
-        owner: "{{ item.owner }}"
-        group: "{{ item.group }}"
+        path: /root/.ssh/  
+        owner: root
+        group: root
         mode: '0755'
         state: directory
-      loop:
-        - path: /root/.ssh/
-          owner: root
-          group: root
-        - path: /home/vagrant/.ssh/
-          owner: vagrant
-          group: vagrant
-           
-    - name: Copiar chaves SSH
-      copy:
-        src: /vagrant/files/id_rsa
-        dest: "{{ item.dest }}"
-        mode: '0400'
-        remote_src: yes
-      loop:
-        - dest: /root/.ssh/
-        - dest: /home/vagrant/.ssh/
-          
-    - name: Copiar chave pública autorizada
+         
+    - name: Copiar chave pública
       copy:
         src: /vagrant/files/id_rsa.pub
         dest: "{{ item.dest }}"
@@ -125,6 +107,7 @@
         name: rundeckd
         enabled: yes
         state: started
+      become: yes
 
     - name: Adicionar chave
       shell: |
@@ -142,6 +125,3 @@
         state: present
         update_cache: yes
       when: ansible_os_family == 'Debian'
-      
-
-  
