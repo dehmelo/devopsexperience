@@ -8,7 +8,7 @@ Também poderá ser instalado o [git](https://git-scm.com/), para realizar o clo
 
 Nome            | vCPUs | Memoria RAM | IP             | S.O.         
 ----------------|:-----:|:-----------:|:--------------:|:---------------:
-devops   | 1     | 2048MB      | 192.168.57.100 | debian/bullseye64
+devops   | 1     | 1024MB      | 192.168.57.100 | debian/bullseye64
 lab1     | 1     | 512MB      | 192.168.57.101 | debian/bookworm64
 lab2     | 1     | 512MB      | 192.168.57.102 | debian/bookworm64
 
