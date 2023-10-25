@@ -66,36 +66,38 @@ vagrant destroy lab1
 
 ## labs
 
-O arquivo [Vagrantfile](https://github.com/dehmelo/devopsexperience/labs/Vagrantfile), descreve quais e como serão criadas as VMS no VirtualBox (para mais informações consulte a doc do [Vagrant](https://developer.hashicorp.com/vagrant/docs)).
+O arquivo [Vagrantfile](https://github.com/dehmelo/devopsexperience/blob/main/labs/Vagrantfile), descreve quais e como serão criadas as VMS no VirtualBox (para mais informações consulte a doc do [Vagrant](https://developer.hashicorp.com/vagrant/docs)).
 
-O provisionamento será feito pelo Ansible, os arquivos estão presentes em `provision`, onde o [devops.yml](https://github.com/dehmelo/devopsexperience/labs/provision/devops.yml) será executado na VM **devops** e o [lab.yml](https://github.com/dehmelo/devopsexperience/labs/provision/lab.yml) será executado nas VMs **lab1** e **lab2**. 
+O provisionamento será feito pelo Ansible, os arquivos estão presentes em `provision`, onde o [devops.yaml](https://github.com/dehmelo/devopsexperience/blob/main/labs/provision/devops.yaml) será executado na VM **devops** e o [lab.yaml](https://github.com/dehmelo/devopsexperience/blob/main/labs/provision/lab.yaml) será executado nas VMs **lab1** e **lab2**. 
 
 O arquivo `ansible.cfg` define que alguns avisos serão ocultos. 
 
-Em `files` está presente o *par de chaves* que será copiado para todas as máquinas durante o provisionamento, para ser possível o fácil acesso (após clonar o repo, no conteúdo de `files`, pode ser adicionado suas chaves pessoais para facilitar o acesso às VMs).
+Em `files` deve estar presente o *par de chaves* que será copiado para todas as máquinas durante o provisionamento, para ser possível o fácil acesso (após clonar o repo, no conteúdo de `files`, pode ser adicionado suas chaves pessoais para facilitar o acesso às VMs).
 
 Na máquina `devops` será instalado, através da playbook de provisionamento, o Rundeck, para realizar o acesso ao seu painel digite no navegador de sua preferência, o IP da VM na porta 4440. Desta forma: `192.168.57.100:4440`
 
 
 ## ansible_projects
 
-> Para esta etapa é necessário estar up o ambiente presente em [labs](https://github.com/dehmelo/devopsexperience/labs)
+> Para esta etapa é necessário estar up o ambiente presente em [labs](https://github.com/dehmelo/devopsexperience/tree/main/labs)
 
-Na pasta [ansible_projects](https://github.com/dehmelo/devopsexperience/ansible_projects) contém um inventário que está mapeado dois grupos com duas VMs que estão presente no [Vagrantfile](https://github.com/dehmelo/devopsexperience/labs/Vagrantfile), são as VMs `lab1` e `lab2`.
+Na pasta [ansible_projects](https://github.com/dehmelo/devopsexperience/tree/main/ansible_projects) contém um inventário que está mapeado dois grupos com duas VMs que estão presente no [Vagrantfile](https://github.com/dehmelo/devopsexperience/blob/main/labs/Vagrantfile), são as VMs `lab1` e `lab2`.
 
 O arquivo `ansible.cfg` define o local do inventário e o local das roles e oculta um possível aviso de depreciação.
 
 
-Para rodar a [playbook](https://github.com/dehmelo/devopsexperience/ansible_projects/playbook.yml) nos hosts mapeados (garanta que as VMs estejam ligadas), abra o seu terminal, acesse a pasta clonada, entre na pasta `ansible_projects` e execute: 
+Para rodar a [playbook](https://github.com/dehmelo/devopsexperience/blob/main/ansible_projects/playbook.yml) nos hosts mapeados (garanta que as VMs estejam ligadas), abra o seu terminal, acesse a pasta clonada, entre na pasta `ansible_projects` e execute:
+
 ```bash
 ansible-playbook playbook.yml
 ```
 
 Após a execução da playbook será possível acessar os seguintes endereços:
 
-`http://192.168.57.101:8080/` - Interface do WordPress disponível para configuração básica, executada em contêiner.
+`http://192.168.57.101:8080/` - Interface do WordPress, rodando em container. 
 
 `http://192.168.57.102:80/` - Interface Web com mensagem gerada a partir da configuração do Apache.
 
+***
 
-Created by: Déborah Melo
+#### Created by: Déborah Melo
