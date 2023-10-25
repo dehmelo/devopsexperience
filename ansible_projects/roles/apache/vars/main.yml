@@ -1,0 +1,7 @@
+username: "root"
+hostname: "devopslabs.com.br"
+host_alias: www.{{ hostname }}
+file_conf: "{{ hostname }}.conf"
+site_disabled: true
+port_http: "80"
+

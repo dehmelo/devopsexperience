@@ -1,0 +1,5 @@
+# Instalação do WordPress em um container Docker
+wordpress_port: 8080
+wordpress_data_dir: /srv/wordpress
+mysql_password: 4labsPassword
+

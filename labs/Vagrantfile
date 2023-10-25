@@ -1,0 +1,31 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+vms = {
+  'devops' => {'memory' => '1024', 'cpus' => 1, 'ip' => '100', 'box' => 'debian/bullseye64', 'provision' => 'provision/devops.yaml'},
+  'lab1' => {'memory' => '512', 'cpus' => 1, 'ip' => '101', 'box' => 'debian/bookworm64', 'provision' => 'provision/lab.yaml'},
+  'lab2' => {'memory' => '512', 'cpus' => 1, 'ip' => '102', 'box' => 'debian/bookworm64', 'provision' => 'provision/lab.yaml'}
+}
+
+Vagrant.configure('2') do |config|
+
+  config.vm.box_check_update = false
+
+  vms.each do |name, conf|
+    config.vm.define "#{name}" do |k|
+      k.vm.box = "#{conf['box']}"
+      k.vm.hostname = "#{name}.devops.com"
+      k.vm.network 'private_network', ip: "192.168.57.#{conf['ip']}"
+      k.vm.provider 'virtualbox' do |vb|
+        vb.customize ["modifyvm", :id, "--groups", "/DevOps"]
+        vb.memory = conf['memory']
+        vb.cpus = conf['cpus']
+      end
+      k.vm.provision 'ansible_local' do |ansible|
+        ansible.playbook = "#{conf['provision']}"
+        ansible.compatibility_mode = '2.0'
+      end
+    end
+  end
+end
+

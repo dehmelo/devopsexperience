@@ -1,0 +1,8 @@
+---
+- hosts: lab1
+  roles:
+    - wordpress
+
+- hosts: lab2
+  roles:
+    - apache

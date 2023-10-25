@@ -1,0 +1,26 @@
+---
+- name: Instalação do Docker
+  apt:
+    name:
+      - docker.io
+      - docker-compose
+    state: present
+
+- name: Criação do diretório para dados do WordPress
+  file:
+    path: "{{ wordpress_data_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Criação do arquivo docker-compose.yml
+  template:
+    src: templates/docker-compose.yml.j2
+    dest: "{{ ansible_env.HOME }}/docker-compose.yml"
+
+- name: Execução do container WordPress
+  docker_compose:
+    project_src: "{{ ansible_env.HOME }}"
+    project_name: wordpress
+    state: present
+    recreate: always
+

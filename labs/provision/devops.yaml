@@ -1,0 +1,147 @@
+---
+- name: Instalação de pacotes e configuração de serviços
+  hosts: all
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: Atualizar repositórios
+      apt:
+        update_cache: yes
+      when: ansible_os_family == 'Debian'
+
+    - name: Instalar pacotes básicos
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - vim
+        - openjdk-11-jdk
+        - gnupg2
+        - curl
+        - git
+        - net-tools
+        - curl
+        - tzdata
+        - sqlite3
+        - ca-certificates
+      when: ansible_os_family == 'Debian'
+
+    - name: Verificar e configurar o fuso horário
+      command: timedatectl set-timezone America/Sao_Paulo
+      args:
+        creates: /etc/localtime
+      when: not ("America/Sao_Paulo" in (ansible_date_time.tz | default([])))
+
+    - name: Criar diretório ".ssh" para o root
+      file:
+        path: "{{ item.path }}"  
+        owner: "{{ item.owner }}"
+        group: "{{ item.group }}"
+        mode: '0755'
+        state: directory
+      loop:
+        - path: /root/.ssh/
+          owner: root
+          group: root
+        - path: /home/vagrant/.ssh/
+          owner: vagrant
+          group: vagrant
+           
+    - name: Copiar chaves SSH
+      copy:
+        src: /vagrant/files/id_rsa
+        dest: "{{ item.dest }}"
+        mode: '0400'
+        remote_src: yes
+      loop:
+        - dest: /root/.ssh/
+        - dest: /home/vagrant/.ssh/
+          
+    - name: Copiar chave pública autorizada
+      copy:
+        src: /vagrant/files/id_rsa.pub
+        dest: "{{ item.dest }}"
+      loop:
+        - dest: /root/.ssh/authorized_keys
+        - dest: /home/vagrant/.ssh/     
+          
+    - name: Criar usuário "devops"
+      user:
+        name: devops
+        state: present
+        comment: DevOps
+        home: /home/devops
+        createhome: yes
+        shell: /bin/bash
+
+    - name: Adicionar "devops" ao grupo "sudo"
+      user:
+        name: devops
+        groups: sudo
+        append: yes
+
+    - name: Configurar sudoers para "devops"
+      lineinfile:
+        path: /etc/sudoers.d/devops
+        create: yes
+        line: "devops ALL=(ALL) NOPASSWD:ALL"
+        
+    - name: Garante Rundeck
+      shell: curl -s https://packagecloud.io/install/repositories/pagerduty/rundeck/script.deb.sh | os=any dist=any bash
+      when: ansible_os_family == 'Debian'
+      
+    - name: Atualizar repositórios novamente
+      apt:
+        update_cache: yes
+      when: ansible_os_family == 'Debian'
+
+    - name: Instalar Rundeck
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - rundeck
+        - rundeck-cli
+      when: ansible_os_family == 'Debian' and not (ansible_facts.packages|default([]) | difference(["rundeck", "rundeck-cli"]))
+
+    - name: Configurar Rundeck
+      replace:
+        path: /etc/rundeck/realm.properties
+        regexp: 'admin:admin'
+        replace: 'devops:devops'
+
+    - name: Atualizar configurações do Rundeck
+      replace:
+        path: "{{ item }}"
+        regexp: 'localhost'
+        replace: '192.168.57.100'
+      loop:
+        - /etc/rundeck/framework.properties
+        - /etc/rundeck/rundeck-config.properties
+
+    - name: Habilitar e iniciar o serviço Rundeck
+      systemd:
+        name: rundeckd
+        enabled: yes
+        state: started
+
+    - name: Adicionar chave
+      shell: |
+        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
+               
+    - name: Adicionar o repositório PPA do Ansible
+      apt_repository:
+        repo: 'deb http://ppa.launchpad.net/ansible/ansible/ubuntu focal main'
+        state: present
+      when: ansible_os_family == 'Debian'
+
+    - name: Instalar o Ansible
+      apt:
+        name: ansible
+        state: present
+        update_cache: yes
+      when: ansible_os_family == 'Debian'
+      
+
+  

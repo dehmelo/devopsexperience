@@ -1,0 +1,34 @@
+- name: Instalando Apache2
+  apt:
+    name: apache2
+    update_cache: yes
+    state: latest
+
+- name: Criando diretorio para o site
+  file:
+    path: "/var/www/html/{{ hostname }}"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0755'
+
+- name: Criando o arquivo index da página
+  template:
+    src: "templates/index.html.j2"
+    dest: "/var/www/html/{{ hostname }}/index.html"
+
+- name: Criando arquivo de configuração
+  template:
+    src: "templates/apache.conf.j2"
+    dest: "/etc/apache2/sites-available/{{ file_conf }}"
+
+- name: Desabilitando o site padrão
+  command:
+    cmd: /usr/sbin/a2dissite 000-default.conf
+  when: site_disabled
+  notify: Reload_Apache
+
+- name: Habilitando o site criado
+  command:
+    cmd: /usr/sbin/a2ensite {{ file_conf }}
+  notify: Reload_Apache

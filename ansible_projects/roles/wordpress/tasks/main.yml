@@ -1,0 +1,3 @@
+---
+- name: Configurando WordPress
+  import_tasks: config.yml

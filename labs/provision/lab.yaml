@@ -1,0 +1,88 @@
+---
+- name: Instalação de pacotes
+  hosts: all
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: Atualizar repositórios
+      apt:
+        update_cache: yes
+        upgrade: full
+      when: ansible_os_family == 'Debian'
+
+    - name: Instalar pacotes básicos
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - vim
+        - gnupg2
+        - curl
+        - git
+        - net-tools
+        - curl
+        - tzdata
+      when: ansible_os_family == 'Debian'
+      
+    - name: Verificar e configurar o fuso horário
+      command: timedatectl set-timezone America/Sao_Paulo
+      args:
+        creates: /etc/localtime
+      when: not ("America/Sao_Paulo" in (ansible_date_time.tz | default([])))
+
+    - name: Criar diretório ".ssh" para o root
+      file:
+        path: "{{ item.path }}"  
+        owner: "{{ item.owner }}"
+        group: "{{ item.group }}"
+        mode: '0755'
+        state: directory
+      loop:
+        - path: /root/.ssh/
+          owner: root
+          group: root
+        - path: /home/vagrant/.ssh/
+          owner: vagrant
+          group: vagrant
+           
+    - name: Copiar chaves SSH
+      copy:
+        src: /vagrant/files/id_rsa
+        dest: "{{ item.dest }}"
+        mode: '0400'
+        remote_src: yes
+      loop:
+        - dest: /root/.ssh/
+        - dest: /home/vagrant/.ssh/
+
+          
+    - name: Copiar chave pública autorizada
+      copy:
+        src: /vagrant/files/id_rsa.pub
+        dest: "{{ item.dest }}"
+      loop:
+        - dest: /root/.ssh/authorized_keys
+        - dest: /home/vagrant/.ssh/     
+          
+    - name: Criar usuário "devops"
+      user:
+        name: devops
+        state: present
+        comment: DevOps
+        home: /home/devops
+        createhome: yes
+        shell: /bin/bash
+
+    - name: Adicionar "devops" ao grupo "sudo"
+      user:
+        name: devops
+        groups: sudo
+        append: yes
+
+    - name: Configurar sudoers para "devops"
+      lineinfile:
+        path: /etc/sudoers.d/devops
+        create: yes
+        line: "devops ALL=(ALL) NOPASSWD:ALL"
+      

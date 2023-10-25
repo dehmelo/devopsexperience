@@ -1,0 +1,15 @@
+all:
+  children:
+    lab1:
+      hosts:
+        192.168.57.101
+    lab2:
+      hosts:
+        192.168.57.102
+
+  vars:
+    ansible_become: true
+    ansible_become_method: sudo
+    ansible_become_user: root
+    ansible_user: root
+    ansible_python_interpreter: /usr/bin/python3
